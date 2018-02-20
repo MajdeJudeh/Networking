@@ -12,7 +12,8 @@ public class DataReceiver {
       long time = System.currentTimeMillis(), previous = 0;
       long previousTime = 0;
       long averageTime = 0;
-      double rate = 0.0;
+      double rate = 0.000;
+      long rateAverage = 0;
       while((intArray = (int[])in.readObject()) != null){
 
 
@@ -27,9 +28,9 @@ public class DataReceiver {
         time = previous - time;
         previousTime = time;
         averageTime = (previousTime + time)/2;
-        rate = 1000/averageTime;
-        System.out.println(averageTime);
-        System.out.println(rate);
+        rate = 1000.0/(double)averageTime;
+        rateAverage = Math.round(rate);
+        System.out.println("Number of packages being sent per second: " + rateAverage);
 
         time = System.currentTimeMillis();
       }
