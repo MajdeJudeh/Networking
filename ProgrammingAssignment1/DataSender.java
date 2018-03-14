@@ -31,8 +31,8 @@ public class DataSender {
     )
     {
       while (true){
-        for (int i = 0; i < rates.length; i++){
-            for(int j = 0; j < interval * rates[i]; j++){
+        for (int i = 0; i < rates.length; i++){//For each rate in rates, rates[] is an array that contains all the rates.
+            for(int j = 0; j < interval * rates[i]; j++){//If each interval simulates
               Thread.sleep(1000/rates[i]);
               out.writeObject(intArray);
             }

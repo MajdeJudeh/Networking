@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 public class DVCoordinator {
 
   public static void main(String[] args){
@@ -8,13 +9,14 @@ public class DVCoordinator {
       System.err.println("Usage: java DVCoordinator <port number> <file name>");
       System.exit(1);
     }
-    String dvIP; //IP address of the DVCoordinator
+    String dvIP = getIP(); //IP address of the DVCoordinator
     int portNum = Integer.parseInt(args[0]); //PortNumber
     File mapOfNeighbors = new File(args[1]);  //File of the adjacency list
 
-    dvIP = getIP();
-    System.out.println(dvIP);
-
+  // ArrayList<String> ello = readFile(mapOfNeighbors);
+  //   for(int i = 0; i < ello.size(); i++){
+  //     System.out.println(ello.get(i));
+  //   }
   }//end of main
 
 
@@ -32,14 +34,14 @@ public class DVCoordinator {
     }//end of catch
     return ip;
 }//end of getIP
-  public static String readFile(File fileSupplied){
-    String fileInput = null;
+  public static ArrayList<String> readFile(File fileSupplied){
+    ArrayList<String> fileInput = new ArrayList<String>();
     BufferedReader reader = null;
     try{
       reader = new BufferedReader(new FileReader(fileSupplied));
       String text = null;
       while ((text = reader.readLine()) != null){
-        fileInput += text;
+        fileInput.add(text);
       }
     }catch (FileNotFoundException e){
         e.printStackTrace();
@@ -48,7 +50,15 @@ public class DVCoordinator {
     }catch (IOException e){
       e.printStackTrace();
       System.out.println("IOException thrown");
-    }
+    }finally{
+      try {
+          if (reader != null) {
+              reader.close();
+          }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }//end of try/catch/finally
 
     return fileInput;
   }//end of readFile

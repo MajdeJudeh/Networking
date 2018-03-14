@@ -3,6 +3,10 @@ import java.io.*;
 
 public class DataReceiver {
   public static void main(String[] args){
+    if (args.length != 2){
+      System.out.println("Usage: java DataReceiver <IP address> <PortNumber>");
+      System.exit(0);
+    }
     try(
     Socket dataReceiver = new Socket(args[0], Integer.parseInt(args[1]));
     ObjectInputStream in = new ObjectInputStream(dataReceiver.getInputStream());
