@@ -10,7 +10,7 @@ public class DVCoordinator {
       System.exit(1);
     }
     String dvIP = getIP(); //IP address of the DVCoordinator
-    int portNum = Integer.parseInt(args[0]); //PortNumber
+    int portNumber = Integer.parseInt(args[0]); //PortNumber
     File mapOfNeighbors = new File(args[1]);  //File of the adjacency list
 
   // ArrayList<String> ello = readFile(mapOfNeighbors);
