@@ -52,11 +52,18 @@ public class DVCoordinator {
   {
     int[] dv = new int[numberOfNodes];
     String[] eachLinkAndValue = linkValues.split(" ");
-    System.out.println(t);
+
     for (int i = 0; i < numberOfNodes; i++){
-      if(i = nodeNumber){
+      if(i == nodeNumber){
         dv[i] = 0;
-      }else if ()
+      }else {
+        for (int j = 0; j < eachLinkAndValue.length; j++){
+          String[] nodeNumberAndWeight = eachLinkAndValue[j].split(":");
+          if(nodeNumberAndWeight[0] == i){
+            dv[i] = nodeNumberAndWeight[1];
+          }
+        }
+      }
     }
     //left off here
 
