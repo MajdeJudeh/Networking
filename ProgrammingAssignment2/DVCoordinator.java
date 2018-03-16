@@ -19,6 +19,7 @@ public class DVCoordinator {
     }//end of catch
     return ip;
   }//end of getIP
+
   public static ArrayList<String> parseFileIntoLines(File fileSupplied){
     ArrayList<String> fileInput = new ArrayList<String>();
     BufferedReader reader = null;
@@ -52,29 +53,54 @@ public class DVCoordinator {
   {
     int[] dv = new int[numberOfNodes];
     String[] eachLinkAndValue = linkValues.split(" ");
-
+    for (int i = 0; i < numberOfNodes; i++){
+      if(i == nodeNumber){
+        dv[i] = 0;
+      }
+      else {
+        dv[i] = Integer.MAX_VALUE;
+      }
+    }
     for (int i = 0; i < numberOfNodes; i++){
       if(i == nodeNumber){
         dv[i] = 0;
       }else {
         for (int j = 0; j < eachLinkAndValue.length; j++){
           String[] nodeNumberAndWeight = eachLinkAndValue[j].split(":");
-          if(nodeNumberAndWeight[0] == i){
-            dv[i] = nodeNumberAndWeight[1];
+          if(Integer.parseInt(nodeNumberAndWeight[0]) == i){
+            dv[i] = Integer.parseInt(nodeNumberAndWeight[1]);
           }
         }
       }
-    }
-    //left off here
 
-    DV NodeAndDistance = null;
-    return NodeAndDistance;
+    }//end of outer for
+    // System.out.println("Node number: " + nodeNumber);
+    // for(int i = 0; i < dv.length; i++){
+    //   System.out.println(dv[i]);
+    // }
+    DV nodeAndDistance = new DV(nodeNumber, dv);
+    // System.out.println("Node number: " + nodeAndDistance.getNodeNumber());
+    // int dv1[] = nodeAndDistance.getDV();
+    // for(int i = 0; i < dv1.length; i++){
+    //   System.out.println(dv1[i]);
+    // }
+    return nodeAndDistance;
   }
-  private static byte[] convertToBytes(DV dv) throws IOException {
-      try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-           ObjectOutput out = new ObjectOutputStream(bos)) {
-          out.writeObject(dv);
-          return bos.toByteArray();
+  private static byte[] convertToBytes(Object object) throws IOException {
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      ObjectOutput out = new ObjectOutputStream(bos);
+      out.writeObject(object);
+      byte[] serializedMessage = bos.toByteArray();
+      out.close();
+      bos.close();
+      return serializedMessage;
+
+  }
+
+  private static Object convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+      try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+           ObjectInput in = new ObjectInputStream(bis)) {
+          return in.readObject();
       }
   }
 
@@ -84,18 +110,42 @@ public class DVCoordinator {
     DatagramSocket socket = new DatagramSocket(portNumber);
 
     for(int i = 0; i < numberOfNodes; i++){
-      byte[] buf = new byte[256];
+      byte[] buf = new byte[512];
       DatagramPacket packet = new DatagramPacket(buf, buf.length);
       socket.receive(packet);
       String bufferInfo = new String(packet.getData(), 0, packet.getLength());
       System.out.println("Buffer info: " + bufferInfo);
       DV dv = parseFileInputIntoNodeAndDV(i, allLinesOfFile.get(i), numberOfNodes);
+
+      System.out.println("Node number: " + dv.getNodeNumber());
+
+      int node = dv.getNodeNumber();
+      int dv1[] = dv.getDV();
+      for(int j = 0; j < dv1.length; j++){
+        System.out.print(dv1[j] + " ");
+      }
+
+
       buf = convertToBytes(dv);
+      try{
+        dv = (DV) convertFromBytes(buf);
+      }
+      catch(ClassNotFoundException e){
+        e.printStackTrace();
+        System.exit(1);
+      }
+      System.out.println("Node number: " + dv.getNodeNumber());
+
+      dv1 = dv.getDV();
+      for(int j = 0; j < dv1.length; j++){
+        System.out.print(dv1[i] + " ");
+      }
 
       InetAddress address = packet.getAddress();
       System.out.println("Address of node " + i + ": " + address);
       int port = packet.getPort();
       packet = new DatagramPacket(buf, buf.length, address, port);
+
       socket.send(packet);
     }
     socket.close();

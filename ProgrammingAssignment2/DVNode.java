@@ -6,13 +6,13 @@ import java.util.HashMap;
 
 public class DVNode{
 
-  private static DV convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+  private static Object convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
       try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
            ObjectInput in = new ObjectInputStream(bis)) {
-          return (DV)in.readObject();
+          return in.readObject();
       }
   }
-  
+
   public static String getIP(){
     URL aws;
     String ip = null;
@@ -28,9 +28,9 @@ public class DVNode{
     return ip;
   }//end of getIP
 
-  public static Integer requestMyNodeNumber(String myIPNumber, String coordinatorIP, Integer coordinatorPort) throws IOException{
+  public static DV requestMyNodeNumberAndDV(String myIPNumber, String coordinatorIP, Integer coordinatorPort) throws IOException{
     DatagramSocket socket = new DatagramSocket();
-    byte[] buf = new byte[256];
+    byte[] buf = new byte[512];
     buf = myIPNumber.getBytes();
     InetAddress coordinatorAddress = InetAddress.getByName(coordinatorIP);
     DatagramPacket myPacket = new DatagramPacket(buf, buf.length, coordinatorAddress, coordinatorPort);
@@ -38,11 +38,17 @@ public class DVNode{
 
     DatagramPacket packet = new DatagramPacket(buf, buf.length);
     socket.receive(packet);
-
-    String received = new String(packet.getData(), 0, packet.getLength());
-    System.out.println("My node number: " + received);
-    Integer myNodeNumber = Integer.parseInt(received);
-    return myNodeNumber;
+    byte[] dataInPacket = packet.getData();
+    System.out.println(dataInPacket);
+    DV receivedDV = null;
+    try{
+      receivedDV = (DV)convertFromBytes(dataInPacket);
+    } catch (ClassNotFoundException e){
+      e.printStackTrace();
+      System.exit(1);
+    }
+    System.out.println("My node number: " + receivedDV);
+    return receivedDV;
   }
 
   public static void main(String[] args) throws IOException{
@@ -54,8 +60,11 @@ public class DVNode{
     int dvCoordinatorPortNumber = Integer.parseInt(args[1]);
     String myIPNumber = getIP();
     int myPortNumber = Integer.parseInt(args[2]);
-    Integer myNodeNumber = requestMyNodeNumber(myIPNumber, dvCoordinatorIP, dvCoordinatorPortNumber);
+    DV myNodeNumberAndDV = requestMyNodeNumberAndDV(myIPNumber, dvCoordinatorIP, dvCoordinatorPortNumber);
+    Integer myNodeNumber = myNodeNumberAndDV.getNodeNumber();
+    int[] myDV = myNodeNumberAndDV.getDV();
 
-
+    System.out.println("My node number: " + myNodeNumber);
+    System.out.println("DV contents: " + myDV);
   }
 }
