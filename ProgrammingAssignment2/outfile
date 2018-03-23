@@ -1,0 +1,17 @@
+Output of Iteration 0
+My dv contents: node_no=0
+[0, 3, 2147483647, 2, 2147483647, 2147483647, 2147483647, 2147483647, 4]
+Output of Iteration 1
+My dv contents: node_no=1
+[3, 0, 2147483647, 2147483647, 2147483647, 2147483647, 2147483647, 4, 2147483647]
+Output of Iteration 2
+My dv contents: node_no=2
+[2147483647, 2147483647, 0, 6, 2147483647, 1, 2147483647, 2, 2147483647]
+Output of Iteration 3
+My dv contents: node_no=3
+[2, 2147483647, 6, 0, 1, 2147483647, 2147483647, 2147483647, 2147483647]
+Output of Iteration 4
+Output of Iteration 5
+Output of Iteration 6
+Output of Iteration 7
+Output of Iteration 8

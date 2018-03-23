@@ -74,87 +74,89 @@ public class DVCoordinator {
       }
 
     }//end of outer for
-    // System.out.println("Node number: " + nodeNumber);
-    // for(int i = 0; i < dv.length; i++){
-    //   System.out.println(dv[i]);
-    // }
+
     DV nodeAndDistance = new DV(nodeNumber, dv);
-    // System.out.println("Node number: " + nodeAndDistance.getNodeNumber());
-    // int dv1[] = nodeAndDistance.getDV();
-    // for(int i = 0; i < dv1.length; i++){
-    //   System.out.println(dv1[i]);
-    // }
+
     return nodeAndDistance;
+  }
+
+
+
+  public static HashMap<Integer,String> getallNodesIP(Integer numberOfNodes, int portNumber, ArrayList<String> allLinesOfFile) throws IOException{
+
+    HashMap<Integer,String> nodeIPTable = new HashMap<Integer,String>();
+    DatagramSocket socket = new DatagramSocket(portNumber);
+    byte[] buf = new byte[512];
+    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+    for(int i = 0; i < numberOfNodes; i++){
+
+      socket.receive(packet); //Receives packet from dvNode.
+      String nodeIP = new String(packet.getData(), 0, packet.getLength()); //The DVNode's ip number.
+      nodeIPTable.put(i, nodeIP); //puts the node and the IP into one table.
+      System.out.println("Node's ip: " + nodeIP);
+      DV dv = parseFileInputIntoNodeAndDV(i, allLinesOfFile.get(i), numberOfNodes);
+
+      System.out.println(dv);
+
+      byte[] dvToBytes = dv.getBytes(); //gives an byte Array representation of DV.
+
+      InetAddress address = InetAddress.getByName(nodeIP);
+      int port = packet.getPort();
+      DatagramPacket newPacket = new DatagramPacket(dvToBytes, dvToBytes.length, address, port);
+
+      socket.send(newPacket);
+
+    }
+
+    socket.close();
+    return nodeIPTable;
   }
   private static byte[] convertToBytes(Object object) throws IOException {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       ObjectOutput out = new ObjectOutputStream(bos);
       out.writeObject(object);
+      out.flush();
       byte[] serializedMessage = bos.toByteArray();
       out.close();
       bos.close();
       return serializedMessage;
 
   }
+  public static void sendNeighborIPTable(HashMap<Integer,String> nodeIPTable, ArrayList<String> allLinesOfFile, Integer numberOfNodes, Integer nodePortNumber) throws IOException{
+    DatagramSocket socketToSendIPTable = new DatagramSocket();
+    String nodeIP;
+    HashMap<Integer,String> neighborIPTable = null;
+    byte[] neighborIPTableToBytes = null;
+    DatagramPacket neighborIPTablePacket = null;
+    for(int nodeNumber = 0; nodeNumber < numberOfNodes; nodeNumber++){
+      nodeIP = nodeIPTable.get(nodeNumber);
 
-  private static Object convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-      try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-           ObjectInput in = new ObjectInputStream(bis)) {
-          return in.readObject();
-      }
-  }
+      neighborIPTable = generateNeighborIPTable(nodeIPTable, allLinesOfFile.get(nodeNumber), numberOfNodes, nodeNumber);
+      neighborIPTableToBytes = convertToBytes(neighborIPTable);
+      System.out.println("Node " + nodeNumber + "'s neighborIPTable: " + neighborIPTable);
+      InetAddress address = InetAddress.getByName(nodeIP);
+      neighborIPTablePacket = new DatagramPacket(neighborIPTableToBytes, neighborIPTableToBytes.length, address, nodePortNumber);
 
-  public static HashMap<Integer,String> getallNodesIP(Integer numberOfNodes, int portNumber, ArrayList<String> allLinesOfFile) throws IOException{
-
-    HashMap<Integer,String> nodeIPTable = null;
-    DatagramSocket socket = new DatagramSocket(portNumber);
-
-    for(int i = 0; i < numberOfNodes; i++){
-      byte[] buf = new byte[512];
-      DatagramPacket packet = new DatagramPacket(buf, buf.length);
-      socket.receive(packet);
-      String bufferInfo = new String(packet.getData(), 0, packet.getLength());
-      System.out.println("Buffer info: " + bufferInfo);
-      DV dv = parseFileInputIntoNodeAndDV(i, allLinesOfFile.get(i), numberOfNodes);
-
-      System.out.println("Node number: " + dv.getNodeNumber());
-
-      int node = dv.getNodeNumber();
-      int dv1[] = dv.getDV();
-      for(int j = 0; j < dv1.length; j++){
-        System.out.print(dv1[j] + " ");
-      }
-
-
-      buf = convertToBytes(dv);
-      try{
-        dv = (DV) convertFromBytes(buf);
-      }
-      catch(ClassNotFoundException e){
-        e.printStackTrace();
-        System.exit(1);
-      }
-      System.out.println("Node number: " + dv.getNodeNumber());
-
-      dv1 = dv.getDV();
-      for(int j = 0; j < dv1.length; j++){
-        System.out.print(dv1[i] + " ");
-      }
-
-      InetAddress address = packet.getAddress();
-      System.out.println("Address of node " + i + ": " + address);
-      int port = packet.getPort();
-      packet = new DatagramPacket(buf, buf.length, address, port);
-
-      socket.send(packet);
+      socketToSendIPTable.send(neighborIPTablePacket);
     }
-    socket.close();
-    return nodeIPTable;
+    socketToSendIPTable.close();
   }
 
+  public static HashMap<Integer,String> generateNeighborIPTable(HashMap<Integer,String> nodeIPTable, String nodesNeighbors, Integer numberOfNodes, Integer nodeNumber) throws IOException{
+    String[] eachLinkAndValue = nodesNeighbors.split(" ");
+    HashMap<Integer,String> neighborIPTable = new HashMap<Integer,String>();
+    for (int i = 0; i < numberOfNodes; i++){
+        for (int j = 0; j < eachLinkAndValue.length; j++){
+          String[] nodeNumberAndWeight = eachLinkAndValue[j].split(":");
+          if(Integer.parseInt(nodeNumberAndWeight[0]) == i){
+            neighborIPTable.put(i, nodeIPTable.get(i));
+          }
+        }
+    }//end of outer for
 
 
-
+    return neighborIPTable;
+  }
 
   public static void main(String[] args){
     if (args.length != 2){
@@ -168,17 +170,25 @@ public class DVCoordinator {
 
     ArrayList<String> allLinesOfFile = parseFileIntoLines(mapOfNeighbors);
     int numberOfNodes = allLinesOfFile.size();
+    HashMap<Integer,String> allNodesIP = null;
     try{
-      HashMap<Integer,String> allNodesIP = getallNodesIP(numberOfNodes, portNumber, allLinesOfFile);
+      allNodesIP = getallNodesIP(numberOfNodes, portNumber, allLinesOfFile); //Gives every node their IP number and maps each node number to  their ip number.
     } catch (IOException e){
       System.err.println("There is an error with your input");
       System.exit(1);
     }
+    System.out.println("All nodes and their IP's table\n");
+    System.out.println(allNodesIP + "\n\n");
+    System.out.println("Waiting 2 seconds so that DVNodes are ready to accept data");
+    try{Thread.sleep(2000);}catch(InterruptedException e){e.printStackTrace();}
+    int nodePortNumber = 11610;
+    try{
+      sendNeighborIPTable(allNodesIP, allLinesOfFile, numberOfNodes, nodePortNumber);
+    } catch(IOException e){
+      System.err.println("There is an IOException in sendNeighborIPTable");
+      System.exit(1);
+    }
 
-
-                  //   for(int i = 0; i < ello.size(); i++){
-                  //     System.out.println(ello.get(i));
-                  //   }
   }//end of main
 
 }//end of DVCoordinator class
