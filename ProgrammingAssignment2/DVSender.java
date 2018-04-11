@@ -5,20 +5,22 @@ import java.net.UnknownHostException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Set;
 
 class DVSender extends Thread {
 
 	//MulticastSocket multOutSocket;
 	String multiSocIP;
 	DatagramSocket socket;
+	DV dvToSend;
 	/**
 	 *
 	 * @param multOutSocket -- this socket already joins with every neighbor's multicast IPs
 	 */
-	public DVSender(String multiSocIP) {
+	public DVSender(String multiSocIP, DV dvToSend) {
 		this.multiSocIP = multiSocIP;
 		try{socket = new DatagramSocket();} catch (SocketException e) {e.printStackTrace(); System.exit(1);}
-
+		this.dvToSend = dvToSend;
 	}
 
 	public void send2Neighbor(byte[] payload) {
@@ -40,11 +42,11 @@ class DVSender extends Thread {
 
 	public void run() {
 		// create DV object
-		int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-		DV myDv = new DV(1, array); // = new DV(...)
+		// int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+		// DV myDv = new DV(1, array); // = new DV(...)
 
-		for (int j=0; j<10; j++) {
-			byte[] dvBA = myDv.getBytes();
+		for (int j=0; j<3; j++) {
+			byte[] dvBA = dvToSend.getBytes();
 			send2Neighbor(dvBA);
 			try {sleep(1000);} catch (Exception e) {e.printStackTrace();}
 		}
@@ -54,9 +56,10 @@ class DVSender extends Thread {
 
 class DVReceiver extends Thread {
 	MulticastSocket multiInSocket;
-
-	public DVReceiver(MulticastSocket multiInSocket) {
+	Set<Integer> nodeNumbers;
+	public DVReceiver(MulticastSocket multiInSocket, Set<Integer> nodeNumbers) {
 		this.multiInSocket = multiInSocket;
+		this.nodeNumbers = nodeNumbers;
 	}
 
 	public byte[] receiveFromNeighbor(int packSize) {
@@ -78,13 +81,22 @@ class DVReceiver extends Thread {
 
 	public void run() {
 		// create DV object
-		DV myDv = null; // = new DV(...)
+		DV neighborDV = null; // = new DV(...)
 
-		for (int j=0; j<10; j++) {
-			// ...
+		while(!nodeNumbers.isEmpty()){
 			byte[] dvBA = this.receiveFromNeighbor(512);
-			DV dv = DV.bytes2DV(dvBA);
-			System.out.println(dv);
+			neighborDV = DV.bytes2DV(dvBA);
+
+			if(nodeNumbers.contains(neighborDV.getNode_num())){
+				System.out.println("Neighbor's DV: " + neighborDV);
+				nodeNumbers.remove(neighborDV.getNode_num());
+			}
 		}
+		// for (int j=0; j<10; j++) {
+		// 	// ...
+		// 	byte[] dvBA = this.receiveFromNeighbor(512);
+		// 	DV dv = DV.bytes2DV(dvBA);
+		// 	System.out.println(dv);
+		// }
 	}
 }

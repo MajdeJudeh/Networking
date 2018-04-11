@@ -75,9 +75,9 @@ public class DVNode{
     int multiSocPortNumber = 11688;
     MulticastSocket multiInSocket = new MulticastSocket(multiSocPortNumber);
     int portNumberPrefix = 116;
-    String myMultiSocketInIP = "230." + portNumberPrefix + ".7." + myNodeNumber;
-    InetAddress myAddress = InetAddress.getByName(myMultiSocketInIP);
-    multiInSocket.joinGroup(myAddress);
+    // String myMultiSocketInIP = "230." + portNumberPrefix + ".0." + myNodeNumber;
+    // InetAddress myAddress = InetAddress.getByName(myMultiSocketInIP);
+    // multiInSocket.joinGroup(myAddress);
     Iterator<Integer> allNodeNumbers = myNeighborIPSet.iterator();
 
     Integer currentNodeNumber = null;
@@ -95,17 +95,17 @@ public class DVNode{
     return multiInSocket;
   }
 
-  public static MulticastSocket getMultiOutSocket(Integer myNodeNumber) throws IOException{
-    int multiSocPortNumber = 11688;
-    MulticastSocket multiOutSocket = new MulticastSocket(multiSocPortNumber);
-    int portNumberPrefix = 116;
-    // String myMultiSocketOutIP = "230." + portNumberPrefix + ".0." + myNodeNumber;
-    // InetAddress myAddress = InetAddress.getByName(myMultiSocketOutIP);
-    // multiOutSocket.joinGroup(myAddress);
-
-
-    return multiOutSocket;
-  }
+  // public static MulticastSocket getMultiOutSocket(Integer myNodeNumber) throws IOException{
+  //   int multiSocPortNumber = 11688;
+  //   MulticastSocket multiOutSocket = new MulticastSocket(multiSocPortNumber);
+  //   int portNumberPrefix = 116;
+  //   // String myMultiSocketOutIP = "230." + portNumberPrefix + ".0." + myNodeNumber;
+  //   // InetAddress myAddress = InetAddress.getByName(myMultiSocketOutIP);
+  //   // multiOutSocket.joinGroup(myAddress);
+  //
+  //
+  //   return multiOutSocket;
+  // }
 
 
   public static void main(String[] args) throws IOException{
@@ -132,13 +132,13 @@ public class DVNode{
     System.out.println("Node " + myNodeNumberAndDV.getNode_num() + "'s neighborIPTable: " + myNeighborIPTable);
 
     MulticastSocket multiInSoc = getMultiInSocket(myNeighborIPTable.keySet(), myNodeNumber);
-    MulticastSocket multiOutSoc = getMultiOutSocket(myNodeNumber);
+    // MulticastSocket multiOutSoc = getMultiOutSocket(myNodeNumber);
 
     int portNumberPrefix = 116;
-    String myMultiSocketInIP = "230." + portNumberPrefix + ".7." + myNodeNumber;
+    String myMultiSocketInIP = "230." + portNumberPrefix + ".0." + myNodeNumber;
 
-    DVReceiver dvReceiver = new DVReceiver(multiInSoc);
-    DVSender dvSender = new DVSender(myMultiSocketInIP);
+    DVReceiver dvReceiver = new DVReceiver(multiInSoc, myNeighborIPTable.keySet());
+    DVSender dvSender = new DVSender(myMultiSocketInIP, myNodeNumberAndDV);
     dvReceiver.start();
 		dvSender.start();
   }
