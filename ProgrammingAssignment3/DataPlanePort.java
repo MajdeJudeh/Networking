@@ -28,9 +28,9 @@ public class DataPlanePort implements Runnable, Callback {
 		ServerSocket serverSocket = null;
 		try {
 			serverSocket = new ServerSocket(portNum);
-          System.out.println("server soc address:" + serverSocket.getInetAddress());
-            System.out.println("server local socket soc address:" + serverSocket.getLocalSocketAddress());
-            System.out.println("server soc port:" + serverSocket.getLocalPort());
+          // System.out.println("server soc address:" + serverSocket.getInetAddress());
+          //   System.out.println("server local socket soc address:" + serverSocket.getLocalSocketAddress());
+          //   System.out.println("server soc port:" + serverSocket.getLocalPort());
         } catch (IOException ioe) {
         	ioe.printStackTrace();
         }
@@ -38,10 +38,10 @@ public class DataPlanePort implements Runnable, Callback {
 			int nodeNum = -1;
        		try {
 				Socket clientSocket = serverSocket.accept(); 	    // not part of communication
-	            System.out.println("client soc IP:" + clientSocket.getInetAddress());
-	            System.out.println("client soc port:" + clientSocket.getLocalPort());
-	            System.out.println("client soc remote IP:" + clientSocket.getRemoteSocketAddress());
-	            System.out.println("client soc remote port:" + clientSocket.getPort());
+	            // System.out.println("client soc IP:" + clientSocket.getInetAddress());
+	            // System.out.println("client soc port:" + clientSocket.getLocalPort());
+	            // System.out.println("client soc remote IP:" + clientSocket.getRemoteSocketAddress());
+	            // System.out.println("client soc remote port:" + clientSocket.getPort());
 				outs[j] = new DataOutputStream(clientSocket.getOutputStream());
 				DataInputStream in = new DataInputStream(clientSocket.getInputStream());
 				nodeNum = in.readInt();

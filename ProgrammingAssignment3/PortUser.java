@@ -24,9 +24,9 @@ public class PortUser {
 			try {
 				soc = new Socket(ip, port);
 				System.out.println("Got a socket.");
-	            System.out.println("client soc IP:" + soc.getInetAddress());
-	            System.out.println("client soc port:" + soc.getLocalPort());
-	            System.out.println("client remote soc port:" + soc.getRemoteSocketAddress());
+	            // System.out.println("client soc IP:" + soc.getInetAddress());
+	            // System.out.println("client soc port:" + soc.getLocalPort());
+	            // System.out.println("client remote soc port:" + soc.getRemoteSocketAddress());
 				in = new DataInputStream(soc.getInputStream());
 				out = new DataOutputStream(soc.getOutputStream());
 				out.writeInt(nodeId);
