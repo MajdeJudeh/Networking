@@ -87,44 +87,44 @@ public class FWNode extends Thread{
 
   }
 
-
-  public static void main(String args[]) throws IOException, InterruptedException{
-    if (args.length != 2){
-      System.err.println("Usage: java FWNode <coordinator-ip> <coordinator-portNumber>");
-      System.exit(1);
-    }
-    DVNode dvNode = new DVNode(args[0], Integer.parseInt(args[1]));
-    dvNode.initialize();
-
-    FWNode fwNode = new FWNode(dvNode.getMyNeighborIPTable(), dvNode.getMyNodeNumber());
-    System.out.println("Before fwNode initialize");
-    fwNode.initialize();
-    Scanner sc = new Scanner(System.in);
-    System.out.println("Enter the total number of nodes for this network");
-    int totalNumberOfNodes = sc.nextInt();
-    int destinationNode;
-    HashMap<Integer, Integer> fwTableFromDVNode = new HashMap<Integer, Integer>(totalNumberOfNodes - 1);
-    for(int i = 0; i < totalNumberOfNodes - 1; i++){
-      System.out.println("Enter the destination node");
-      destinationNode = sc.nextInt();
-      System.out.println("Enter the neighbor node to forward to");
-      int neigborNode = sc.nextInt();
-      fwTableFromDVNode.put(destinationNode, neigborNode);
-    }
-    fwNode.setForwardTable(fwTableFromDVNode);
-    System.out.println("forwardTable Generated");
-    int destNode;
-    byte[] pack = new byte[1024];
-    fwNode.start();
-    do{
-      System.out.println("Choose a node to send data to, type -1 to quit");
-      destNode = sc.nextInt();
-      if(destNode != -1){
-        Arrays.fill(pack, (byte)destNode);
-        fwNode.sendData(destNode, pack);
-      }
-    }while(destNode != -1);
-
-
-  }
+  //
+  // public static void main(String args[]) throws IOException, InterruptedException{
+  //   if (args.length != 2){
+  //     System.err.println("Usage: java FWNode <coordinator-ip> <coordinator-portNumber>");
+  //     System.exit(1);
+  //   }
+  //   DVNode dvNode = new DVNode(args[0], Integer.parseInt(args[1]));
+  //   dvNode.initialize();
+  //
+  //   FWNode fwNode = new FWNode(dvNode.getMyNeighborIPTable(), dvNode.getMyNodeNumber());
+  //   System.out.println("Before fwNode initialize");
+  //   fwNode.initialize();
+  //   Scanner sc = new Scanner(System.in);
+  //   System.out.println("Enter the total number of nodes for this network");
+  //   int totalNumberOfNodes = sc.nextInt();
+  //   int destinationNode;
+  //   HashMap<Integer, Integer> fwTableFromDVNode = new HashMap<Integer, Integer>(totalNumberOfNodes - 1);
+  //   for(int i = 0; i < totalNumberOfNodes - 1; i++){
+  //     System.out.println("Enter the destination node");
+  //     destinationNode = sc.nextInt();
+  //     System.out.println("Enter the neighbor node to forward to");
+  //     int neigborNode = sc.nextInt();
+  //     fwTableFromDVNode.put(destinationNode, neigborNode);
+  //   }
+  //   fwNode.setForwardTable(fwTableFromDVNode);
+  //   System.out.println("forwardTable Generated");
+  //   int destNode;
+  //   byte[] pack = new byte[1024];
+  //   fwNode.start();
+  //   do{
+  //     System.out.println("Choose a node to send data to, type -1 to quit");
+  //     destNode = sc.nextInt();
+  //     if(destNode != -1){
+  //       Arrays.fill(pack, (byte)destNode);
+  //       fwNode.sendData(destNode, pack);
+  //     }
+  //   }while(destNode != -1);
+  //
+  //
+  // }
 }
