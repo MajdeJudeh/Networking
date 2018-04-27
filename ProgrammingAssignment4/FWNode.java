@@ -13,6 +13,7 @@ public class FWNode extends Thread{
   int fwNodeNumber;
   Set<Integer> neighborNodeNumbers;
   HashMap<Integer,PortUser> portUsersForNeighbors;
+  boolean readyToForward;
   final int MY_PORTNUMBER = 11610;
   public FWNode(HashMap<Integer,String> neighborIPTable, int myFWNodeNumber){
     this.portNumber = MY_PORTNUMBER;
@@ -23,11 +24,14 @@ public class FWNode extends Thread{
     portUsersForNeighbors = new HashMap<Integer,PortUser>(numberOfNeighbors);
     dpPort = new DataPlanePort(portNumber, numberOfNeighbors);
     fwNodeNumber = myFWNodeNumber;
+    readyToForward = false;
   }
   public void setForwardTable(HashMap<Integer, Integer> fwTableFromDVNode){
     fwTable = fwTableFromDVNode;
   }
-
+  public boolean getReadyToForwardStatus(){
+    return readyToForward;
+  }
   public void forwardData(MessageType msg){
       Integer portUserNeeded = fwTable.get(msg.getDestNode());
       portUsersForNeighbors.get(portUserNeeded).send(msg);
@@ -42,9 +46,11 @@ public class FWNode extends Thread{
     }
   }
 
+  public void signalReadyToForward(){
+    readyToForward = true;
+  }
   public void receiveData(){
     ConcurrentLinkedQueue<MessageType> messagesReceived = dpPort.getQue();
-    while(true){
       if(messagesReceived.peek() != null){
             MessageType receivedMessage = messagesReceived.poll();
             if(receivedMessage.getDestNode() == fwNodeNumber){
@@ -57,7 +63,7 @@ public class FWNode extends Thread{
             }
       }
 
-    }
+
   }
   public void initialize() throws InterruptedException{
     new Thread(dpPort).start();
@@ -86,6 +92,7 @@ public class FWNode extends Thread{
     receiveData();
 
   }
+
 
   //
   // public static void main(String args[]) throws IOException, InterruptedException{

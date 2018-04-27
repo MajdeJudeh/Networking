@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class DVCoordinator {
 
@@ -159,7 +160,7 @@ public class DVCoordinator {
     return neighborIPTable;
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) throws Exception{
     if (args.length != 2){
       System.err.println("Usage: java DVCoordinator <port number> <file name>");
       System.exit(1);
@@ -190,6 +191,29 @@ public class DVCoordinator {
       System.exit(1);
     }
 
+    try{Thread.sleep(5000);}catch(InterruptedException e){e.printStackTrace();}
+
+    Scanner input = new Scanner(System.in);
+    System.out.println("Enter the node that you wish to pump data to. Enter -1 if you do not wish to pump from here");
+    int pumpNode = input.nextInt();
+    if (pumpNode != -1){
+      System.out.println("Enter the interval(seconds per rate) that you wish to send data at");
+      int interval = input.nextInt();
+      System.out.println("Enter the rates that you wish to pump data at and -1 to quit");
+      ArrayList<Integer> rates = new ArrayList<Integer>();
+      int rate;
+      while((rate = input.nextInt()) != -1){
+        rates.add(rate);
+      }
+      String ipAddress = allNodesIP.get(pumpNode);
+      DataSender dataSender = new DataSender(interval, 11611, ipAddress, rates);
+      byte[] pack = new byte[1024];
+      Arrays.fill(pack, (byte)1);
+      MessageType message = new MessageType(pumpNode, 3, pack);
+      System.out.println("Before sending data");
+      dataSender.sendData(message);
+
+    }//end of if
   }//end of main
 
 }//end of DVCoordinator class

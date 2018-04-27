@@ -24,6 +24,7 @@ public class ControlPlane extends Thread implements ChangeListener{
   boolean changedSelf;
   HashMap<Integer,Integer> forwardTable;
   HashMap<Integer,Integer> neighborLinksOnly; //First integer is the neigbor and second integer is the distance to the neigbor
+  FWNode fwNode;
   public ControlPlane(String coordinatorIP, Integer coordinatorPort){
     dvCoordinatorIP = coordinatorIP;
     dvCoordinatorPortNumber = coordinatorPort;
@@ -48,10 +49,10 @@ public class ControlPlane extends Thread implements ChangeListener{
     myNodeNumber = myNodeNumberAndDV.getNode_num();
     System.out.println(myNodeNumberAndDV);
     myNeighborIPTable = getNeighborIPTable();
-    initializeForwardTableAndNeigborsLinks();
   }
 
-  public void initializeForwardTableAndNeigborsLinks(){
+  public void initializeForwardTableAndNeigborsLinks(FWNode fwNode){
+    this.fwNode = fwNode;
     int[] myDV = myNodeNumberAndDV.getDV();
     for(int i =0; i < myDV.length; i++){
       if(myDV[i] < Integer.MAX_VALUE && myDV[i] != 0){
@@ -59,6 +60,7 @@ public class ControlPlane extends Thread implements ChangeListener{
         neighborLinksOnly.put(i,myDV[i]);
       }
     }
+    fwNode.setForwardTable(forwardTable);
   }
 
 
@@ -214,6 +216,10 @@ public class ControlPlane extends Thread implements ChangeListener{
             //try{sleep(10000);} catch (Exception e) {e.printStackTrace();}
             dvSender.run();
           }
+          fwNode.setForwardTable(forwardTable);
+          if(forwardTable.size() == (myDVContents.length - 1)){
+            fwNode.signalReadyToForward();
+          }
           System.out.println("Forward Table: " + forwardTable);
           System.out.println("Afterwards");
         }//end of changed ne
@@ -225,23 +231,23 @@ public class ControlPlane extends Thread implements ChangeListener{
     dvAlgorithim();
   }
 
-  public static void main(String[] args) throws IOException{
-    if (args.length != 2){
-      System.err.println("Usage: java ControlPlane <coordinator-ip> <coordinator-portNumber>");
-      System.exit(1);
-    }
-
-    ControlPlane controlPlane = new ControlPlane(args[0], Integer.parseInt(args[1]));
-    controlPlane.initialize();
-    controlPlane.dvSwap();
-    controlPlane.start();
-    // DVNode dvNode = new DVNode(args[0], Integer.parseInt(args[1]));
-    // dvNode.initialize();
-    // //dvNode.getDVFromNeighbors();
-    // dvNode.dvSwapSetUp();
-    // dvNode.dvSwap();Fg
-
-  }
+  // public static void main(String[] args) throws IOException{
+  //   if (args.length != 2){
+  //     System.err.println("Usage: java ControlPlane <coordinator-ip> <coordinator-portNumber>");
+  //     System.exit(1);
+  //   }
+  //
+  //   ControlPlane controlPlane = new ControlPlane(args[0], Integer.parseInt(args[1]));
+  //   controlPlane.initialize();
+  //   controlPlane.dvSwap();
+  //   controlPlane.start();
+  //   // DVNode dvNode = new DVNode(args[0], Integer.parseInt(args[1]));
+  //   // dvNode.initialize();
+  //   // //dvNode.getDVFromNeighbors();
+  //   // dvNode.dvSwapSetUp();
+  //   // dvNode.dvSwap();Fg
+  //
+  // }
 }
 
 //
