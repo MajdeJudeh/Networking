@@ -40,16 +40,19 @@ class DVSender extends Thread {
 		}
 	}
 
+	public void setDV(DV newDV){
+		this.dvToSend = newDV;
+	}
+
 	public void run() {
 		// create DV object
 		// int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 		// DV myDv = new DV(1, array); // = new DV(...)
+			for(int i = 0; i < 3; i++){
+				byte[] dvBA = dvToSend.getBytes();
+				send2Neighbor(dvBA);
+			}
 
-		for (int j=0; j<3; j++) {
-			byte[] dvBA = dvToSend.getBytes();
-			send2Neighbor(dvBA);
-			try {sleep(1000);} catch (Exception e) {e.printStackTrace();}
-		}
 	}
 
 }
@@ -90,7 +93,6 @@ class DVReceiver extends Thread {
 			neighborDV = DV.bytes2DV(dvBA);
 
 			if(nodeNumbers.contains(neighborDV.getNode_num())){
-				System.out.println("Neighbor's DV: " + neighborDV);
 				cl.changed(neighborDV);
 			}
 		}
