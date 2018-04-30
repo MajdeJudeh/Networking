@@ -211,19 +211,26 @@ public class ControlPlane extends Thread implements ChangeListener{
           Collection<DV> collectionOfNeighbors = neighbors.values();
           Iterator<DV> iteratorOfNeighbors;
           int[] myDVContents = Arrays.copyOf(myNodeNumberAndDV.getDV(), myNodeNumberAndDV.getDV().length);
-
-
+          for(int i = 0; i < myDVContents.length; i++){
+            if(i == myNodeNumber){
+              myDVContents[i] = 0;
+            }else if (neighborLinksOnly.containsKey(i)){
+              myDVContents[i] = neighborLinksOnly.get(i);
+            }else {
+              myDVContents[i] = Integer.MAX_VALUE;
+            }
+          }
+          int[] neighborDVContents;
+          int neighborNodeNumber;
             for(int i = 0; i < myDVContents.length; i++){
               iteratorOfNeighbors = collectionOfNeighbors.iterator();
-
               while(iteratorOfNeighbors.hasNext()){
                 neighborDVtemp = iteratorOfNeighbors.next();
-                int[] neighborDVContents = neighborDVtemp.getDV();
-                int neighborNodeNumber = neighborDVtemp.getNode_num();
+                neighborDVContents = neighborDVtemp.getDV();
+                neighborNodeNumber = neighborDVtemp.getNode_num();
                     if(neighborDVContents[i] != Integer.MAX_VALUE){
                       if(myDVContents[i] > (neighborDVContents[i] + neighborLinksOnly.get(neighborNodeNumber))){
                         myDVContents[i] = neighborDVContents[i] + neighborLinksOnly.get(neighborNodeNumber);
-                        System.out.println("My dv contents changed");
                         if(forwardTable.get(i) != null){
                           forwardTable.replace(i, neighborNodeNumber);
                         }else{
@@ -235,9 +242,6 @@ public class ControlPlane extends Thread implements ChangeListener{
               }
             }//Check against my own Links to see if they are faster???
 
-          System.out.println("Finished changing my dv");
-          System.out.println(Arrays.toString(myDVContents));
-          System.out.println(Arrays.toString(myNodeNumberAndDV.getDV()));
           if(!(Arrays.equals(myDVContents, myNodeNumberAndDV.getDV()))){
             System.out.println("DV updated");
             System.out.println("Original: " + myNodeNumberAndDV);
@@ -252,8 +256,6 @@ public class ControlPlane extends Thread implements ChangeListener{
             fwNode.signalReadyToForward();
           }
           System.out.println("Forward Table: " + forwardTable);
-          System.out.println("Afterwards");
-
       }//end of else statement
     }//end of while
   }
