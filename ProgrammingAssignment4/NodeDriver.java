@@ -19,8 +19,12 @@ public class NodeDriver{
     controlPlane.start();
     fwNode.start();
     Scanner input = new Scanner(System.in);
+		Thread.sleep(5000);
 
-		Thread.sleep(10000);
+    System.out.println("Type 1 if you wish to change the weight of one of your links to your neighbors. Type any other number to exit");
+    while(input.nextInt() == 1){
+      controlPlane.changeLinkWeight();
+    }
         System.out.println("Is the node a pumpNode. Type 1 for yes and any other number for no");
         if(input.nextInt() == 1){
           ServerSocket serverSocket = new ServerSocket(11611);

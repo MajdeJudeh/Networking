@@ -128,7 +128,11 @@ class Listner extends Thread {
 		int msgSize = 0;
 		while (msgSize != -1) {
 			try {
+
 				msgSize = in.read(packet);
+				if(msgSize == -1){
+					continue;
+				}
 				System.out.println("Listner " + pId + ": " + msgSize + " bytes.");
 				MessageType msg = MessageType.bytearray2messagetype(packet);
 				requester.callback(msg);

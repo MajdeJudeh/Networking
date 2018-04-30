@@ -51,6 +51,7 @@ public class FWNode extends Thread{
   }
   public void receiveData(){
     ConcurrentLinkedQueue<MessageType> messagesReceived = dpPort.getQue();
+    while(true){
       if(messagesReceived.peek() != null){
             MessageType receivedMessage = messagesReceived.poll();
             if(receivedMessage.getDestNode() == fwNodeNumber){
@@ -62,6 +63,7 @@ public class FWNode extends Thread{
               forwardData(receivedMessage);
             }
       }
+    }
 
 
   }

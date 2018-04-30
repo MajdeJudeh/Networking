@@ -182,7 +182,7 @@ public class DVCoordinator {
     System.out.println("All nodes and their IP's table\n");
     System.out.println(allNodesIP + "\n\n");
     System.out.println("Waiting 2 seconds so that DVNodes are ready to accept data");
-    try{Thread.sleep(2000);}catch(InterruptedException e){e.printStackTrace();}
+    try{Thread.sleep(1000);}catch(InterruptedException e){e.printStackTrace();}
     int nodePortNumber = 11610;
     try{
       sendNeighborIPTable(allNodesIP, allLinesOfFile, numberOfNodes, nodePortNumber);
@@ -191,12 +191,15 @@ public class DVCoordinator {
       System.exit(1);
     }
 
-    try{Thread.sleep(5000);}catch(InterruptedException e){e.printStackTrace();}
+    try{Thread.sleep(3000);}catch(InterruptedException e){e.printStackTrace();}
 
     Scanner input = new Scanner(System.in);
     System.out.println("Enter the node that you wish to pump data to. Enter -1 if you do not wish to pump from here");
     int pumpNode = input.nextInt();
+
     if (pumpNode != -1){
+      System.out.println("Enter the destination node that you wish to end up at");
+      int destNode = input.nextInt();
       System.out.println("Enter the interval(seconds per rate) that you wish to send data at");
       int interval = input.nextInt();
       System.out.println("Enter the rates that you wish to pump data at and -1 to quit");
@@ -209,7 +212,7 @@ public class DVCoordinator {
       DataSender dataSender = new DataSender(interval, 11611, ipAddress, rates);
       byte[] pack = new byte[1024];
       Arrays.fill(pack, (byte)1);
-      MessageType message = new MessageType(pumpNode, 3, pack);
+      MessageType message = new MessageType(pumpNode, destNode, pack);
       System.out.println("Before sending data");
       dataSender.sendData(message);
 
