@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class ControlPlane extends Thread implements ChangeListener{
-  String dvCoordinatorIP;
+  String dvCoordinatorIP; //
   int dvCoordinatorPortNumber;
   String myIPNumber;
   int myPortNumber;
@@ -44,15 +44,16 @@ public class ControlPlane extends Thread implements ChangeListener{
   }
 
   @Override
-  public void changed(DV dv){
-    if(neighborDV != dv){
+  public void changed(DV dv){//Changed is called from inside of dvReceiver.
+    if(neighborDV != dv){//Changed first checks if the DV passed in is the most up to date neighbor dv.
       this.neighborDV = dv;
-      changed = true;
-      if(neighbors.containsKey(neighborDV.getNode_num())){
-        neighbors.replace(neighborDV.getNode_num(), neighborDV);
+
+      if(neighbors.containsKey(neighborDV.getNode_num())){ //Checks if the dv for this neighbor is already in the map.
+        neighbors.replace(neighborDV.getNode_num(), neighborDV); //Replaces it if it is.
       }else{
-        neighbors.put(neighborDV.getNode_num(), neighborDV);
+        neighbors.put(neighborDV.getNode_num(), neighborDV); //Adds it if it isnt.
       }
+      changed = true; //Update Changed into true so the DV dvAlgorithim starts
     }
   }
 
@@ -69,12 +70,12 @@ public class ControlPlane extends Thread implements ChangeListener{
     int node = input.nextInt();
     System.out.println("Enter the new weight between you and your neighbor");
     int weight = input.nextInt();
-    neighborLinksOnly.replace(node, weight);
-    changed = true;
+    neighborLinksOnly.replace(node, weight); //Replaces the previous weight with new weight.
+    changed = true; //Update changed into true so the DV dvAlgorithim starts
 
   }
 
-  public void initializeForwardTableAndNeigborsLinks(FWNode fwNode){
+  public void initializeForwardTableAndNeigborsLinks(FWNode fwNode){ //Intiailizes the forwardTable and Neighbor links for every node.
     this.fwNode = fwNode;
     int[] myDV = myNodeNumberAndDV.getDV();
     for(int i =0; i < myDV.length; i++){
@@ -205,12 +206,11 @@ public class ControlPlane extends Thread implements ChangeListener{
       if(!changed){
         try{sleep(100);} catch (Exception e) {e.printStackTrace();}
       }else{
-          changed = false;
+          changed = false; //Sets changed into false so that algorithm stops after this iteration until changed is true again.
 
-          DV neighborDVtemp;
-          Collection<DV> collectionOfNeighbors = neighbors.values();
-          Iterator<DV> iteratorOfNeighbors;
+
           int[] myDVContents = Arrays.copyOf(myNodeNumberAndDV.getDV(), myNodeNumberAndDV.getDV().length);
+          //This if statement resets the DV into only the data it directly has.
           for(int i = 0; i < myDVContents.length; i++){
             if(i == myNodeNumber){
               myDVContents[i] = 0;
@@ -220,19 +220,24 @@ public class ControlPlane extends Thread implements ChangeListener{
               myDVContents[i] = Integer.MAX_VALUE;
             }
           }
+          DV neighborDVtemp;
+          Collection<DV> collectionOfNeighbors = neighbors.values(); //Gets the DVs of all the neighbors.
+          Iterator<DV> iteratorOfNeighbors;
           int[] neighborDVContents;
           int neighborNodeNumber;
             for(int i = 0; i < myDVContents.length; i++){
               iteratorOfNeighbors = collectionOfNeighbors.iterator();
-              while(iteratorOfNeighbors.hasNext()){
-                neighborDVtemp = iteratorOfNeighbors.next();
-                neighborDVContents = neighborDVtemp.getDV();
-                neighborNodeNumber = neighborDVtemp.getNode_num();
-                    if(neighborDVContents[i] != Integer.MAX_VALUE){
+              while(iteratorOfNeighbors.hasNext()){//Does the below for each neighbor.
+                neighborDVtemp = iteratorOfNeighbors.next(); //Gets the DV of the neighbor.
+                neighborDVContents = neighborDVtemp.getDV(); //Gets the contents of the DV for the neighbor.
+                neighborNodeNumber = neighborDVtemp.getNode_num(); //Gets the node number of the neighbor.
+                    if(neighborDVContents[i] != Integer.MAX_VALUE){ //Checks to make sure the neighbors path is not Integer.MAX_VALUE to avoid overflow.
+                      //Checks to see if (the sum of the neighbors path to the destination node and
+                      //the current nodes path to its neighbor) is faster than the current nodes path to the destination node.
                       if(myDVContents[i] > (neighborDVContents[i] + neighborLinksOnly.get(neighborNodeNumber))){
-                        myDVContents[i] = neighborDVContents[i] + neighborLinksOnly.get(neighborNodeNumber);
+                        myDVContents[i] = neighborDVContents[i] + neighborLinksOnly.get(neighborNodeNumber); //If it is, assign new weight to destination node.
                         if(forwardTable.get(i) != null){
-                          forwardTable.replace(i, neighborNodeNumber);
+                          forwardTable.replace(i, neighborNodeNumber); //Update the forward table.
                         }else{
                           forwardTable.put(i, neighborNodeNumber);
                         }
@@ -242,16 +247,16 @@ public class ControlPlane extends Thread implements ChangeListener{
               }
             }//Check against my own Links to see if they are faster???
 
-          if(!(Arrays.equals(myDVContents, myNodeNumberAndDV.getDV()))){
+          if(!(Arrays.equals(myDVContents, myNodeNumberAndDV.getDV()))){ //Checks to see if my DV was changed at all.
             System.out.println("DV updated");
             System.out.println("Original: " + myNodeNumberAndDV);
             myNodeNumberAndDV.setDV(myDVContents);
             System.out.println("Updated: " + myNodeNumberAndDV);
             dvSender.setDV(myNodeNumberAndDV);
             //try{sleep(10000);} catch (Exception e) {e.printStackTrace();}
-            dvSender.run();
+            dvSender.run(); //If my DV changed, then send my updated DV to my neighbors.
           }
-          fwNode.setForwardTable(forwardTable);
+          fwNode.setForwardTable(forwardTable); //Update FWNodes forwarding table.
           if(forwardTable.size() == (myDVContents.length - 1)){
             fwNode.signalReadyToForward();
           }

@@ -61,7 +61,7 @@ class DVReceiver extends Thread {
 	MulticastSocket multiInSocket;
 	Set<Integer> nodeNumbers;
 	ChangeListener cl;
-	public DVReceiver(MulticastSocket multiInSocket, Set<Integer> nodeNumbers, ChangeListener cl) {
+	public DVReceiver(MulticastSocket multiInSocket, Set<Integer> nodeNumbers, ChangeListener cl) { //Takes in a changeListener that is controlPLane.
 		this.multiInSocket = multiInSocket;
 		this.nodeNumbers = nodeNumbers;
 		this.cl = cl;
@@ -89,11 +89,11 @@ class DVReceiver extends Thread {
 		DV neighborDV = null; // = new DV(...)
 		byte[] dvBA;
 		while(true){
-			dvBA = this.receiveFromNeighbor(512);
-			neighborDV = DV.bytes2DV(dvBA);
+			dvBA = this.receiveFromNeighbor(512); //After receiving data
+			neighborDV = DV.bytes2DV(dvBA); // Convert the contents to a DV.
 
 			if(nodeNumbers.contains(neighborDV.getNode_num())){
-				cl.changed(neighborDV);
+				cl.changed(neighborDV); //Send the DV to ControlPlane.
 			}
 		}
 		// for (int j=0; j<10; j++) {

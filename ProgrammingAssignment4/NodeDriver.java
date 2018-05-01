@@ -28,15 +28,15 @@ public class NodeDriver{
         System.out.println("Is the node a pumpNode. Type 1 for yes and any other number for no");
         if(input.nextInt() == 1){
           ServerSocket serverSocket = new ServerSocket(11611);
-          Socket receivingSocket = serverSocket.accept();
+          Socket receivingSocket = serverSocket.accept(); //Waits for a connection from DVcoordinator. Only one nodeDriver connects to DVCoordinator.
           DataInputStream in = new DataInputStream(receivingSocket.getInputStream());
 
           byte[] byteArray = new byte[1536];
 
           try{
-            while((in.read(byteArray)) != -1){
+            while((in.read(byteArray)) != -1){ //Reads input in from dvCoordinator that is acting as a pump.
               MessageType message = MessageType.bytearray2messagetype(byteArray);
-                fwNode.forwardData(message);
+                fwNode.forwardData(message);// Forwards all data to necessary node.
             }
 
           } catch (IOException e){

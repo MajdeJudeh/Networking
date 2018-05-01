@@ -1,0 +1,19 @@
+dvCoordinatorIP: 137.30.123.202
+Node's ip: 137.30.123.214
+node_no=0
+[0, 6, 3]
+Node's ip: 137.30.123.215
+node_no=1
+[6, 0, 2]
+Node's ip: 137.30.123.217
+node_no=2
+[3, 2, 0]
+All nodes and their IP's table
+
+{0=137.30.123.214, 1=137.30.123.215, 2=137.30.123.217}
+
+
+Waiting 2 seconds so that DVNodes are ready to accept data
+Node 0's neighborIPTable: {1=137.30.123.215, 2=137.30.123.217}
+Node 1's neighborIPTable: {0=137.30.123.214, 2=137.30.123.217}
+Node 2's neighborIPTable: {0=137.30.123.214, 1=137.30.123.215}

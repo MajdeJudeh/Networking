@@ -199,13 +199,13 @@ public class DVCoordinator {
 
     if (pumpNode != -1){
       System.out.println("Enter the destination node that you wish to end up at");
-      int destNode = input.nextInt();
+      int destNode = input.nextInt(); //User types in destination node.
       System.out.println("Enter the interval(seconds per rate) that you wish to send data at");
-      int interval = input.nextInt();
+      int interval = input.nextInt(); //User types in the interval.
       System.out.println("Enter the rates that you wish to pump data at and -1 to quit");
       ArrayList<Integer> rates = new ArrayList<Integer>();
       int rate;
-      while((rate = input.nextInt()) != -1){
+      while((rate = input.nextInt()) != -1){  // User types in the rates.
         rates.add(rate);
       }
       String ipAddress = allNodesIP.get(pumpNode);
@@ -214,7 +214,7 @@ public class DVCoordinator {
       Arrays.fill(pack, (byte)1);
       MessageType message = new MessageType(pumpNode, destNode, pack);
       System.out.println("Before sending data");
-      dataSender.sendData(message);
+      dataSender.sendData(message); //DVCoordinator pumps data to the pump node who will then forward the data to the destination node.
 
     }//end of if
   }//end of main
